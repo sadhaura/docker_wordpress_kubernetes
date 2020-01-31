@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql-server-wordpress
+  labels:
+    app: mysql-server-wordpress
+spec:
+  template:
+    metadata:
+      labels:
+        app: mysql-server-wordpress
+    spec:
+      volumes:
+      - name: mysql-volume-wordpress
+        persistentVolumeClaim:
+          claimName: volume-wordpress
+      containers:
+      - name: mysql-server-wordpress
+        image: mysql:5.7
+        args:
+          - "--ignore-db-dir=lost+found"
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: configmap-wordpress
+              # Specify the key associated with the value
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: configmap-wordpress
+              # Specify the key associated with the value
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-wordpress
+              key: MYSQL_PASSWORD
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-wordpress
+              key: MYSQL_ROOT_PASSWORD
+
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: mysql-volume-wordpress
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql-service-wordpress
+spec:
+  selector:
+    app: mysql-server-wordpress
+  ports:
+  - name: mysql-wordpress
+    protocol: TCP
+    port: 3306
+    targetPort: 3306
+

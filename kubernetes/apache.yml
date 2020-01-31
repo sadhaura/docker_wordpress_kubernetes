@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: my-wordpress-server
+  labels:
+    app: my-wordpress-server
+spec:
+  template:
+    metadata:
+      labels:
+        app: my-wordpress-server
+    spec:
+      containers:
+      - name: my-wordpress-server
+        image: wordpress:latest
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: configmap-wordpress
+              # Specify the key associated with the value
+              key: MYSQL_HOST
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: configmap-wordpress
+              # Specify the key associated with the value
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              name: configmap-wordpress
+              # Specify the key associated with the value
+              key: MYSQL_USER
+
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-wordpress
+              key: MYSQL_PASSWORD
+
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-wordpress-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: my-wordpress-server
+  ports:
+    - name: php
+      protocol: TCP
+      port: 80
+      targetPort: 80
+
