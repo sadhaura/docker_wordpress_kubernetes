@@ -32,7 +32,7 @@ You must have kubernetes cluster up and running.
 
 git clone https://github.com/sadhaura/docker_wordpress_kubernetes.git
 
-2. cd docker_wordpress_kubernetes
+2. cd docker_wordpress_kubernetes/kubernetes
 
 3. Run the below command
 
